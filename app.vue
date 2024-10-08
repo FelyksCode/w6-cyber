@@ -1,11 +1,10 @@
 <template>
   <main class="container-fluid">
-
-    <!-- Form to add new comment -->
     <div class="grid">
       <div id="section-form">
         <h1 id="title">Guestbook</h1>
         <button @click="downloadFile">Download Guide</button>
+        <!-- Form to add new comment -->
         <section>
           <h2>Add a Comment</h2>
           <form @submit.prevent="addComment">
@@ -17,7 +16,7 @@
 
             <label for="comment">Comment:</label>
             <textarea id="comment" v-model="form.comment" required></textarea>
-
+            <div class="g-recaptcha" data-sitekey="YOUR_SITE_KEY"></div>
             <button type="submit">Add Comment</button>
           </form>
         </section>
@@ -27,7 +26,12 @@
           <h2>Search Comments</h2>
           <form @submit.prevent="searchComments">
             <label for="search">Keyword:</label>
-            <input type="text" id="search" v-model="searchQuery" placeholder="Search for comments..." />
+            <input
+              type="text"
+              id="search"
+              v-model="searchQuery"
+              placeholder="Search for comments..."
+            />
             <button type="submit">Search</button>
             <button @click="fetchComments" type="button">Reset</button>
           </form>
@@ -48,81 +52,87 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted } from "vue";
 
 const form = ref({
-  name: '',
-  email: '',
-  comment: ''
-})
+  name: "",
+  email: "",
+  comment: "",
+});
 
-const comments = ref([])
-const searchQuery = ref('')
+const comments = ref([]);
+const searchQuery = ref("");
 
 const fetchComments = async () => {
   try {
-    const response = await $fetch('/api/get-comments', {
-      method: 'GET'
-    })
-    comments.value = response
+    const response = await $fetch("/api/get-comments", {
+      method: "GET",
+    });
+    comments.value = response;
   } catch (error) {
-    console.error('Failed to fetch comments:', error)
+    console.error("Failed to fetch comments:", error);
   }
-}
+};
 
 const addComment = async () => {
   try {
-    await $fetch('/api/add-comment', {
-      method: 'POST',
-      body: form.value
-    })
+    // Get reCAPTCHA token
+    // const captchaToken = await grecaptcha.execute("YOUR_SITE_KEY");
+
+    await $fetch("/api/add-comment", {
+      method: "POST",
+      body: {
+        ...form.value, // Your form data
+        // captchaToken, // Include the CAPTCHA token
+      },
+    });
 
     form.value = {
-      name: '',
-      email: '',
-      comment: ''
-    }
-    await fetchComments()
+      name: "",
+      email: "",
+      comment: "",
+    };
+    await fetchComments();
   } catch (error) {
-    console.error('Failed to add comment:', error)
+    console.error("Failed to add comment:", error);
   }
-}
+};
 
 const searchComments = async () => {
   try {
     if (!searchQuery.value) {
-      return fetchComments()
+      return fetchComments();
     }
 
-    const response = await $fetch('/api/search-comment', {
-      method: 'GET',
-      query: { search: searchQuery.value }
-    })
+    const response = await $fetch("/api/search-comment", {
+      method: "GET",
+      query: { search: searchQuery.value },
+    });
 
-    comments.value = response
+    comments.value = response;
   } catch (error) {
-    console.error('Failed to search comments:', error)
+    console.error("Failed to search comments:", error);
   }
-}
+};
 
 const downloadFile = async () => {
   try {
-    const filename = 'guide.pdf';
+    const filename = "guide.pdf";
 
     const url = `/api/read-file?filename=${encodeURIComponent(filename)}`;
 
-    const link = document.createElement('a');
+    const link = document.createElement("a");
     link.href = url;
     link.download = filename;
     link.click();
   } catch (error) {
-    console.error('Failed to download the file:', error);
+    console.error("Failed to download the file:", error);
   }
-}
+};
 
 onMounted(() => {
-  fetchComments()
-})
+  fetchComments();
+});
 </script>
 
 <style scoped>

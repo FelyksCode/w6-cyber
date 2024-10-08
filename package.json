@@ -17,11 +17,15 @@
   "dependencies": {
     "@picocss/pico": "^2.0.6",
     "@prisma/client": "^5.20.0",
+    "axios": "^1.7.7",
+    "dompurify": "^3.1.7",
     "nuxt": "^3.13.0",
     "vue": "latest",
     "vue-router": "latest"
   },
   "devDependencies": {
+    "@types/axios": "^0.14.0",
+    "@types/dompurify": "^3.0.5",
     "prisma": "^5.20.0"
   }
 }
