@@ -1,6 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 import { defineEventHandler, readBody } from "h3";
-import DOMPurify from "dompurify";
+import sanitizeHtml from "sanitize-html";
 import axios from "axios"; // Import axios for making HTTP requests
 
 const prisma = new PrismaClient();
@@ -28,8 +28,11 @@ export default defineEventHandler(async (event) => {
   // }
 
   // Sanitasi komentar untuk mencegah XSS
-  const sanitizedComment = DOMPurify.sanitize(comment);
-
+  const sanitizedComment = sanitizeHtml(comment, {
+    allowedTags: [], // Disallow all HTML tags
+    allowedAttributes: {}, // Remove all attributes
+  });
+  
   const newEntry = await prisma.guestbookEntry.create({
     data: {
       name,
